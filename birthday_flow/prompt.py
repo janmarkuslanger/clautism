@@ -23,3 +23,27 @@ TASK_PROMPT = (
     "Zusatzinfo:{{ item.age_hint }}\n"
     "Sprich die Person direkt mit Namen an. Gib nur die Nachricht aus."
 )
+
+
+# --- Tone check -----------------------------------------------------------
+# Second LLM step: a guardrail that verifies the draft matches the intended
+# tone for the relationship and corrects it if needed.
+TONE_CHECK_SYSTEM_PROMPT = (
+    "Du bist ein Lektor fuer Geburtstagsnachrichten. Du pruefst, ob eine "
+    "Nachricht zum gewuenschten Ton und zur Beziehung passt. Passt sie, gibst "
+    "du sie unveraendert zurueck. Passt sie nicht (falscher Ton, zu lang/kurz, "
+    "unpassend, falscher Name, Meta-Text), schreibst du sie korrigiert neu. "
+    "Du gibst IMMER nur die finale Nachricht aus - ohne Anfuehrungszeichen, "
+    "ohne Erklaerung, ohne Bewertung."
+)
+
+# ``item`` carries the person context plus the draft to review.
+TONE_CHECK_PROMPT = (
+    "Beziehung: {{ item.relation }}.\n"
+    "Empfaenger: {{ item.name }}.\n"
+    "Gewuenschter Ton: {{ item.tone }}\n"
+    "Sprache: {{ item.language }}.\n"
+    "Zu pruefender Entwurf:\n{{ item.draft }}\n\n"
+    "Gib die finale, zum Ton passende Geburtstagsnachricht aus - nur die "
+    "Nachricht selbst."
+)

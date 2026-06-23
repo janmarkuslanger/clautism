@@ -13,13 +13,16 @@ Ja. Stagehand ist ein Workflow-/Agenten-Framework (DAG) mit eingebautem
 gebraucht wird. Der Flow besteht aus drei Schritten:
 
 ```
-find_birthdays  ──▶  compose (Fan-out, 1 LLM-Call pro Person)  ──▶  dispatch
+find_birthdays ─▶ compose (Fan-out) ─▶ tone_check (Fan-out) ─▶ dispatch
 ```
 
 - **find_birthdays** (Python): lädt die Personen, filtert auf heute.
 - **compose** (Ollama-Agent): schreibt pro Person eine beziehungs-spezifische
   Nachricht. Über Stagehands `over=` Fan-out läuft der Agent einmal je Person.
-- **dispatch** (Python): verschickt jede Nachricht über ihren Kanal.
+- **tone_check** (Ollama-Agent): prüft pro Person, ob der Entwurf zum
+  gewünschten Ton der Beziehung passt, und schreibt ihn bei Bedarf um (Guardrail
+  vor dem Versand).
+- **dispatch** (Python): verschickt jede finale Nachricht über ihren Kanal.
 
 (Das andere Stagehand – die Browser-Automatisierung von Browserbase – wäre hier
 *nicht* sinnvoll; Telegram hat eine Bot-API, kein Browser nötig.)

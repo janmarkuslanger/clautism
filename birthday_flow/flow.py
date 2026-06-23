@@ -1,10 +1,12 @@
 """The birthday flow, built as a Stagehand workflow (a small DAG).
 
-    find_birthdays  ->  compose (fan-out, one LLM call per person)  ->  dispatch
+    find_birthdays -> compose (fan-out) -> tone_check (fan-out) -> dispatch
 
 * ``find_birthdays`` (deterministic) loads people and keeps only today's.
 * ``compose`` (agent, Ollama) writes one relation-aware message per person.
-* ``dispatch`` (deterministic) sends each message via its channel.
+* ``tone_check`` (agent, Ollama) verifies each draft matches the intended tone
+  for the relationship and rewrites it if it does not.
+* ``dispatch`` (deterministic) sends each final message via its channel.
 
 The channels are decoupled: ``dispatch`` only looks them up in the registry, so
 new channels need no change here.
@@ -20,7 +22,12 @@ from stagehand.adapters.executor import OllamaExecutor
 from birthday_flow.channels.base import get_channel
 from birthday_flow.config import Config
 from birthday_flow.people import birthdays_today, load_people
-from birthday_flow.prompt import SYSTEM_PROMPT, TASK_PROMPT
+from birthday_flow.prompt import (
+    SYSTEM_PROMPT,
+    TASK_PROMPT,
+    TONE_CHECK_PROMPT,
+    TONE_CHECK_SYSTEM_PROMPT,
+)
 
 
 def build_workflow(config: Config) -> WorkflowBuilder:
@@ -40,10 +47,16 @@ def build_workflow(config: Config) -> WorkflowBuilder:
         result = ctx.get_task_result("find_birthdays")
         return list(result.data or []) if result else []
 
-    async def dispatch(ctx: RunContext) -> TaskResult:
+    def people_with_drafts(ctx: RunContext) -> list[dict[str, Any]]:
         people = people_to_celebrate(ctx)
         compose = ctx.get_task_result("compose")
-        messages = list(compose.data or []) if compose else []
+        drafts = list(compose.data or []) if compose else []
+        return [{**person, "draft": str(draft)} for person, draft in zip(people, drafts)]
+
+    async def dispatch(ctx: RunContext) -> TaskResult:
+        people = people_to_celebrate(ctx)
+        checked = ctx.get_task_result("tone_check")
+        messages = list(checked.data or []) if checked else []
 
         sent: list[str] = []
         for person, message in zip(people, messages):
@@ -63,6 +76,12 @@ def build_workflow(config: Config) -> WorkflowBuilder:
             model=config.model,
             system_prompt=SYSTEM_PROMPT,
         )
+        .agent(
+            "tone_checker",
+            OllamaExecutor(host=config.ollama_host),
+            model=config.model,
+            system_prompt=TONE_CHECK_SYSTEM_PROMPT,
+        )
         .state_dir(config.state_dir)
         .task("find_birthdays", fn=find_birthdays)
         .task(
@@ -72,7 +91,14 @@ def build_workflow(config: Config) -> WorkflowBuilder:
             after=["find_birthdays"],
             over=people_to_celebrate,
         )
-        .task("dispatch", fn=dispatch, after=["compose"])
+        .task(
+            "tone_check",
+            agent="tone_checker",
+            prompt=TONE_CHECK_PROMPT,
+            after=["compose"],
+            over=people_with_drafts,
+        )
+        .task("dispatch", fn=dispatch, after=["tone_check"])
     )
 
 

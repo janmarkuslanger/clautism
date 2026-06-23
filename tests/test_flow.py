@@ -10,14 +10,20 @@ from birthday_flow.config import Config
 
 
 class FakeExecutor(AgentExecutor):
-    """Stands in for Ollama: echoes the recipient from the resolved prompt."""
+    """Stands in for Ollama: echoes the resolved prompt.
+
+    Records every call on the class so tests can assert how many LLM steps ran
+    across both agents (compose + tone_check).
+    """
+
+    calls: list[ExecutionRequest] = []
 
     def __init__(self, *args, **kwargs):
-        self.requests: list[ExecutionRequest] = []
+        pass
 
     async def execute(self, request: ExecutionRequest) -> ExecutionResult:
-        self.requests.append(request)
-        # The prompt already has {{ item.name }} resolved by the scheduler.
+        FakeExecutor.calls.append(request)
+        # The prompt already has {{ item.* }} resolved by the scheduler.
         return ExecutionResult(output=f"FAKE-MSG[{request.prompt}]")
 
 
@@ -47,6 +53,7 @@ def _config(people_file: Path, today: date) -> Config:
 
 
 def test_flow_sends_only_todays_birthdays(tmp_path, monkeypatch, capsys):
+    FakeExecutor.calls = []
     monkeypatch.setattr(flow, "OllamaExecutor", FakeExecutor)
     config = _config(_write_people(tmp_path), date(2026, 6, 23))
 
@@ -61,7 +68,23 @@ def test_flow_sends_only_todays_birthdays(tmp_path, monkeypatch, capsys):
     assert "[console]" in out
 
 
+def test_tone_check_runs_for_each_person(tmp_path, monkeypatch, capsys):
+    FakeExecutor.calls = []
+    monkeypatch.setattr(flow, "OllamaExecutor", FakeExecutor)
+    config = _config(_write_people(tmp_path), date(2026, 6, 23))
+
+    asyncio.run(flow.build_workflow(config).run())
+
+    # 2 birthdays x (compose + tone_check) = 4 LLM calls.
+    assert len(FakeExecutor.calls) == 4
+    tone_check_calls = [c for c in FakeExecutor.calls if "Zu pruefender Entwurf" in c.prompt]
+    assert len(tone_check_calls) == 2
+    # The tone check sees the draft produced by compose.
+    assert any("FAKE-MSG[" in c.prompt for c in tone_check_calls)
+
+
 def test_flow_handles_no_birthdays(tmp_path, monkeypatch, capsys):
+    FakeExecutor.calls = []
     monkeypatch.setattr(flow, "OllamaExecutor", FakeExecutor)
     config = _config(_write_people(tmp_path), date(2026, 1, 1))
 
@@ -69,3 +92,4 @@ def test_flow_handles_no_birthdays(tmp_path, monkeypatch, capsys):
 
     out = capsys.readouterr().out
     assert "[console]" not in out  # nothing sent
+    assert FakeExecutor.calls == []  # no LLM work at all
