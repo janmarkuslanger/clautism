@@ -1,69 +1,81 @@
-# clautism — Birthday Flow
+# 🎉 Birthday Flow™ — Disrupting Human Affection Since Right Now
 
-Ein lokaler Flow, der täglich prüft, wer heute Geburtstag hat, je nach
-**Beziehung** einen passenden Geburtstagstext schreibt und ihn über einen
-**Kanal** verschickt. Läuft komplett lokal mit [Ollama](https://ollama.com) und
-ist als kleiner DAG mit [Stagehand](https://github.com/janmarkuslanger/stagehand)
-gebaut.
+> *"What if love... but as a cron job?"*
 
-## Macht Stagehand hier Sinn?
+Welcome to the future. You used to be the kind of person who **forgot** their own
+grandmother's birthday. A monster. A disgrace to the family WhatsApp group.
 
-Ja. Stagehand ist ein Workflow-/Agenten-Framework (DAG) mit eingebautem
-**Ollama-Executor** und Template-Ausdrücken (`{{ ... }}`) – genau das, was hier
-gebraucht wird. Der Flow besteht aus drei Schritten:
+Not anymore. Now an AI does the loving for you. Runs **100% locally** on
+[Ollama](https://ollama.com), orchestrated as a tiny DAG with
+[Stagehand](https://github.com/janmarkuslanger/stagehand). **Next level.** 🚀🧠✨
 
-```
-find_birthdays ─▶ compose (Fan-out) ─▶ tone_check (Fan-out) ─▶ dispatch
-```
+## The Problem We Heroically Solved
 
-- **find_birthdays** (Python): lädt die Personen, filtert auf heute.
-- **compose** (Ollama-Agent): schreibt pro Person eine beziehungs-spezifische
-  Nachricht. Über Stagehands `over=` Fan-out läuft der Agent einmal je Person.
-- **tone_check** (Ollama-Agent): prüft pro Person, ob der Entwurf zum
-  gewünschten Ton der Beziehung passt, und schreibt ihn bei Bedarf um (Guardrail
-  vor dem Versand).
-- **dispatch** (Python): verschickt jede finale Nachricht über ihren Kanal.
+Remembering that people exist is *hard*. Caring about them on a specific calendar
+day? Practically a full-time job. Birthday Flow™ leverages cutting-edge
+**artificial intelligence** to outsource both. Connection, automated. Sincerity,
+generated locally at 8 AM by a 7-billion-parameter model that has never met your
+mom.
 
-(Das andere Stagehand – die Browser-Automatisierung von Browserbase – wäre hier
-*nicht* sinnvoll; Telegram hat eine Bot-API, kein Browser nötig.)
-
-## Architektur / Erweiterbarkeit
+## How It Bringst People Together™
 
 ```
-birthday_flow/
-  config.py        # Konfiguration aus Env-Variablen
-  people.py        # Personen-Daten laden + Geburtstagslogik
-  relations.py     # Beziehung -> Ton/Stil (hier erweitern)
-  prompt.py        # System- und Task-Prompt
-  flow.py          # der Stagehand-Workflow (Kern)
-  channels/
-    base.py        # Channel-Interface + Registry
-    telegram.py    # erster Kanal: Telegram
-    console.py     # Kanal für lokales Testen / Dry-Run
+find_birthdays ─▶ compose ─▶ tone_check ─▶ dispatch ─▶ ❤️ (allegedly)
 ```
 
-**Neuen Kanal hinzufügen, ohne den Kern anzufassen:** eine Datei in
-`birthday_flow/channels/` anlegen, eine `Channel`-Klasse mit `name` und
-`async def send(...)` definieren und mit `@register_channel` dekorieren. Die
-Kanäle werden beim Start automatisch entdeckt (`load_channels()`), und
-`dispatch` löst sie nur über die Registry auf – der Flow selbst ändert sich nie.
+1. **find_birthdays** (plain Python) — a robot checks if anyone you "love" was
+   born today.
+2. **compose** (Ollama agent, one call per person via fan-out) — a robot writes
+   them something heartfelt, in a tone that matches the relationship.
+3. **tone_check** (Ollama agent, one call per person) — *another* robot
+   double-checks the first robot's feelings and rewrites them if the vibe is off.
+   One layer of simulated affection simply wasn't enough.
+4. **dispatch** (plain Python) — a third, deeply judgmental robot hits send.
+5. Your grandmother cries. She thinks you wrote it. You were asleep.
 
-```python
-from birthday_flow.channels.base import Channel, register_channel
+(No, the *other* Stagehand — the browser-automation one — would not help here.
+Telegram has a Bot API. No browser, no problem.)
 
-@register_channel
-class EmailChannel(Channel):
-    name = "email"
-    async def send(self, recipient: str, message: str) -> None:
-        ...
+## Quick Start (For Visionaries)
+
+```bash
+# 1. Install the feelings dependencies
+pip install -r requirements.txt          # or: pip install -e .
+
+# 2. Summon the local feelings engine
+ollama pull qwen2.5
+ollama serve
+
+# 3. List everyone you'd otherwise forget
+cp data/people.example.json data/people.json
+#   ...then edit data/people.json (see "The Data" below)
+
+# 4. Acquire a robot mouthpiece (token from @BotFather on Telegram)
+export TELEGRAM_BOT_TOKEN="123456:ABC..."
+
+# 5. Become a wonderful person, instantly
+python -m birthday_flow
 ```
 
-In der Personen-Datei verweist dann `"channel": "email"` darauf.
+### Too scared to unleash it on real humans?
 
-## Datenformat
+Disrupt yourself first — feelings, but only to your terminal:
 
-Minimale Daten pro Person (`data/people.json`, Beispiel siehe
-`data/people.example.json`):
+```bash
+BIRTHDAY_DRY_RUN=1 python -m birthday_flow      # routes everything to the console channel
+```
+
+### Test a specific day (because waiting for a birthday is so analog)
+
+```bash
+BIRTHDAY_DATE=2026-06-23 BIRTHDAY_DRY_RUN=1 python -m birthday_flow
+```
+
+## The Data (a.k.a. the people you keep forgetting)
+
+There is no database. There is no cloud. Just a flat **JSON file on disk**,
+`data/people.json` (template: `data/people.example.json`). It's `.gitignore`d, so
+your loved ones won't end up on GitHub.
 
 ```json
 [
@@ -78,49 +90,68 @@ Minimale Daten pro Person (`data/people.json`, Beispiel siehe
 ]
 ```
 
-- `birthday`: `YYYY-MM-DD` (mit Alter) oder `MM-DD` (ohne Jahr).
-- `relation`: einer der Schlüssel aus `relations.py` (sonst `default`).
-- `recipient`: kanal-spezifische Adresse – bei Telegram die Chat-ID.
+- `birthday` — `YYYY-MM-DD` (we'll smugly mention the age) or `MM-DD` (we won't).
+- `relation` — drives the tone. One of the keys in `relations.py`
+  (`grandparent`, `parent`, `sibling`, `partner`, `friend`, `colleague`),
+  otherwise `default`.
+- `channel` — which delivery channel to use (today: `telegram` or `console`).
+- `recipient` — channel-specific address. For Telegram, the chat id.
 
-## Setup & Ausführen
+Loading and the birthday math live in `birthday_flow/people.py`. Data is read into
+memory at runtime and never written back. Stagehand does persist per-run state
+(including generated messages) under `.stagehand/runs/` — also `.gitignore`d, and
+relocatable via `BIRTHDAY_STATE_DIR`.
 
-```bash
-pip install -r requirements.txt          # oder: pip install -e .
+## Configuration (Env Variables)
 
-# Ollama lokal starten
-ollama pull qwen2.5
-ollama serve
-
-# Personen anlegen (oder das Beispiel nutzen)
-cp data/people.example.json data/people.json
-
-# Telegram-Bot-Token setzen (von @BotFather)
-export TELEGRAM_BOT_TOKEN="123456:ABC..."
-
-python -m birthday_flow
-```
-
-### Lokal testen ohne Versand
-
-```bash
-BIRTHDAY_DRY_RUN=1 python -m birthday_flow      # gibt Nachrichten auf der Konsole aus
-```
-
-### Konfiguration (Env-Variablen)
-
-| Variable | Default | Zweck |
+| Variable | Default | Purpose |
 |---|---|---|
-| `OLLAMA_HOST` | `http://localhost:11434` | Ollama-Endpunkt |
-| `BIRTHDAY_MODEL` | `qwen2.5` | Ollama-Modell |
-| `BIRTHDAY_PEOPLE_FILE` | `data/people.json` | Pfad zur Personen-Datei |
-| `BIRTHDAY_DATE` | heute | Datum überschreiben (zum Testen) |
-| `BIRTHDAY_DRY_RUN` | aus | alles auf den `console`-Kanal umleiten |
-| `TELEGRAM_BOT_TOKEN` | – | für den Telegram-Versand |
+| `OLLAMA_HOST` | `http://localhost:11434` | Ollama endpoint |
+| `BIRTHDAY_MODEL` | `qwen2.5` | Ollama model |
+| `BIRTHDAY_PEOPLE_FILE` | `data/people.json` | Path to the people file |
+| `BIRTHDAY_DATE` | today | Override the date (for testing) |
+| `BIRTHDAY_DRY_RUN` | off | Route everything to the `console` channel |
+| `BIRTHDAY_STATE_DIR` | `.stagehand/runs` | Where Stagehand stores run state |
+| `TELEGRAM_BOT_TOKEN` | – | Required for actually sending via Telegram |
 
-### Täglich ausführen (cron)
+## Omnichannel Disruption 📡 (currently disrupting one (1) channel)
+
+Channels are pluggable and auto-discovered, so adding one requires **zero changes
+to the core flow**. Drop a file in `birthday_flow/channels/`, define a `Channel`
+subclass with a `name` and an `async send(...)`, decorate it with
+`@register_channel`, and you're done:
+
+```python
+from birthday_flow.channels.base import Channel, register_channel
+
+@register_channel
+class EmailChannel(Channel):
+    name = "email"
+    async def send(self, recipient: str, message: str) -> None:
+        ...
+```
+
+Then point a person at it: `"channel": "email"`. The registry finds it on its own.
+
+## Project Layout
+
+```
+birthday_flow/
+  config.py        # configuration from env variables
+  people.py        # load people data + birthday logic
+  relations.py     # relation -> tone/style (extend here)
+  prompt.py        # system + task prompts (compose & tone_check)
+  flow.py          # the Stagehand workflow (the core DAG)
+  channels/
+    base.py        # Channel interface + registry
+    telegram.py    # first channel: Telegram
+    console.py     # channel for local testing / dry-run
+```
+
+## Run It Daily (cron, for set-and-forget affection)
 
 ```cron
-0 8 * * *  cd /pfad/zu/clautism && /usr/bin/python -m birthday_flow >> birthday.log 2>&1
+0 8 * * *  cd /path/to/clautism && /usr/bin/python -m birthday_flow >> birthday.log 2>&1
 ```
 
 ## Tests
@@ -128,3 +159,10 @@ BIRTHDAY_DRY_RUN=1 python -m birthday_flow      # gibt Nachrichten auf der Konso
 ```bash
 pytest
 ```
+
+---
+
+*Birthday Flow™ is not responsible for the slow, dawning realization that the
+warmest message your loved ones received this year was statistically
+autocompleted by a machine that ran offline while you slept. Bringing people
+together. Never forget again. Bla.* ✨
