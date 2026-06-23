@@ -1,4 +1,4 @@
-# 🎉 Birthday Flow™ — Disrupting Human Affection Since Right Now
+# 🎉 clautism — Disrupting Human Affection Since Right Now
 
 > *"What if love... but as a cron job?"*
 
@@ -12,7 +12,7 @@ Not anymore. Now an AI does the loving for you. Runs **100% locally** on
 ## The Problem We Heroically Solved
 
 Remembering that people exist is *hard*. Caring about them on a specific calendar
-day? Practically a full-time job. Birthday Flow™ leverages cutting-edge
+day? Practically a full-time job. clautism leverages cutting-edge
 **artificial intelligence** to outsource both. Connection, automated. Sincerity,
 generated locally at 8 AM by a 7-billion-parameter model that has never met your
 mom.
@@ -162,7 +162,7 @@ pytest
 
 ---
 
-*Birthday Flow™ is not responsible for the slow, dawning realization that the
+*clautism is not responsible for the slow, dawning realization that the
 warmest message your loved ones received this year was statistically
 autocompleted by a machine that ran offline while you slept. Bringing people
 together. Never forget again. Bla.* ✨
