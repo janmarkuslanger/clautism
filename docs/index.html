@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Birthday Flow™ — AI-Native Affection Infrastructure</title>
+<meta name="description" content="The world's first end-to-end, AI-native, fully-local platform for never forgetting a birthday again. Bringing people together. Bla." />
+<style>
+  :root{
+    --bg:#05010f; --bg2:#0d0524; --card:rgba(255,255,255,.04);
+    --stroke:rgba(255,255,255,.10); --txt:#f4f1ff; --muted:#a99fce;
+    --p1:#ff4d8d; --p2:#a14bff; --p3:#22d3ee; --p4:#ffd166;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(1200px 800px at 80% -10%,#2a0f4d 0%,transparent 60%),
+               radial-gradient(900px 700px at -10% 20%,#08203e 0%,transparent 55%),
+               var(--bg);
+    color:var(--txt);line-height:1.6;overflow-x:hidden;
+  }
+  a{color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  .grad{background:linear-gradient(90deg,var(--p1),var(--p2) 45%,var(--p3));
+        -webkit-background-clip:text;background-clip:text;color:transparent}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;
+        padding:7px 14px;border:1px solid var(--stroke);border-radius:999px;
+        background:var(--card);color:var(--muted);backdrop-filter:blur(6px)}
+  .btn{display:inline-block;font-weight:700;border-radius:14px;padding:15px 26px;
+        text-decoration:none;cursor:pointer;border:none;font-size:16px;transition:.2s}
+  .btn-primary{background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;
+        box-shadow:0 14px 40px -12px rgba(161,75,255,.8)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 20px 50px -12px rgba(255,77,141,.9)}
+  .btn-ghost{background:var(--card);border:1px solid var(--stroke);color:var(--txt)}
+  .btn-ghost:hover{border-color:var(--p2)}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+      background:rgba(5,1,15,.6);border-bottom:1px solid var(--stroke)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{font-weight:900;letter-spacing:-.5px;font-size:20px}
+  .nav-links{display:flex;gap:26px;font-size:14px;color:var(--muted)}
+  .nav-links a{text-decoration:none}.nav-links a:hover{color:#fff}
+  @media(max-width:720px){.nav-links{display:none}}
+
+  /* hero */
+  .hero{text-align:center;padding:90px 0 60px;position:relative}
+  .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;z-index:-1}
+  h1{font-size:clamp(40px,8vw,84px);line-height:1.02;font-weight:900;letter-spacing:-2px;margin:22px 0 18px}
+  .sub{font-size:clamp(17px,2.4vw,22px);color:var(--muted);max-width:680px;margin:0 auto 18px}
+  .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .micro{margin-top:16px;font-size:13px;color:var(--muted)}
+
+  /* logos */
+  .trust{padding:30px 0 10px;text-align:center}
+  .trust p{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+  .logos{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;margin-top:16px;
+        opacity:.7;font-weight:800;font-size:18px}
+  .logos span{filter:grayscale(1)}
+
+  section{padding:64px 0}
+  .eyebrow{color:var(--p3);font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:13px}
+  h2{font-size:clamp(28px,4.5vw,46px);font-weight:900;letter-spacing:-1px;margin:8px 0 10px}
+  .lead{color:var(--muted);max-width:620px}
+
+  /* metrics */
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .metric{background:var(--card);border:1px solid var(--stroke);border-radius:18px;padding:26px;text-align:center}
+  .metric .n{font-size:38px;font-weight:900}
+  .metric .l{color:var(--muted);font-size:13px;margin-top:4px}
+  @media(max-width:720px){.metrics{grid-template-columns:repeat(2,1fr)}}
+
+  /* feature grid */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--stroke);border-radius:18px;padding:24px;transition:.2s}
+  .card:hover{transform:translateY(-4px);border-color:var(--p2)}
+  .card .ico{font-size:30px}
+  .card h3{margin:12px 0 6px;font-size:19px}
+  .card p{color:var(--muted);font-size:14.5px}
+
+  /* terminal */
+  .term{background:#0a0618;border:1px solid var(--stroke);border-radius:16px;overflow:hidden;
+        box-shadow:0 30px 80px -30px rgba(0,0,0,.8)}
+  .term .bar{display:flex;gap:8px;padding:13px 16px;border-bottom:1px solid var(--stroke);background:rgba(255,255,255,.03)}
+  .dot{width:12px;height:12px;border-radius:50%}
+  .term pre{padding:22px;overflow-x:auto;font:14px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace}
+  .c-com{color:#7d72a8}.c-cmd{color:#7ef0c2}.c-out{color:#cfc6ee}.c-key{color:var(--p4)}
+  .two{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center}
+  @media(max-width:860px){.two{grid-template-columns:1fr}}
+
+  /* testimonials */
+  .quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px}
+  @media(max-width:860px){.quotes{grid-template-columns:1fr}}
+  .quote{background:var(--card);border:1px solid var(--stroke);border-radius:18px;padding:24px}
+  .quote p{font-size:15px}.stars{color:var(--p4);margin-bottom:8px}
+  .who{margin-top:14px;display:flex;align-items:center;gap:10px}
+  .ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--p1),var(--p2));
+       display:flex;align-items:center;justify-content:center;font-weight:800}
+  .who b{font-size:14px}.who span{font-size:12px;color:var(--muted)}
+
+  /* pricing */
+  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px;align-items:stretch}
+  @media(max-width:860px){.tiers{grid-template-columns:1fr}}
+  .tier{background:var(--card);border:1px solid var(--stroke);border-radius:20px;padding:28px;display:flex;flex-direction:column}
+  .tier.hot{border-color:var(--p1);box-shadow:0 24px 70px -30px rgba(255,77,141,.7);position:relative}
+  .tier.hot::before{content:"🔥 MOST DISRUPTIVE";position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+      background:linear-gradient(90deg,var(--p1),var(--p2));font-size:11px;font-weight:800;padding:5px 12px;border-radius:999px}
+  .price{font-size:40px;font-weight:900;margin:10px 0}
+  .price small{font-size:14px;color:var(--muted);font-weight:600}
+  .tier ul{list-style:none;margin:14px 0 22px;display:flex;flex-direction:column;gap:9px}
+  .tier li{font-size:14px;color:var(--muted)}.tier li::before{content:"✓ ";color:var(--p3);font-weight:900}
+  .tier .btn{margin-top:auto;text-align:center}
+
+  /* faq */
+  details{background:var(--card);border:1px solid var(--stroke);border-radius:14px;padding:16px 20px;margin-bottom:12px}
+  summary{cursor:pointer;font-weight:700;list-style:none}
+  summary::after{content:"+";float:right;color:var(--p2);font-weight:900}
+  details[open] summary::after{content:"−"}
+  details p{color:var(--muted);margin-top:10px;font-size:14.5px}
+
+  /* final cta */
+  .final{text-align:center;background:linear-gradient(135deg,rgba(255,77,141,.14),rgba(161,75,255,.14));
+        border:1px solid var(--stroke);border-radius:28px;padding:60px 24px;margin:30px 0}
+  footer{border-top:1px solid var(--stroke);padding:34px 0;color:var(--muted);font-size:13px;text-align:center}
+  .disc{max-width:760px;margin:14px auto 0;font-size:12px;opacity:.7}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap nav-in">
+  <div class="logo">🎂 Birthday<span class="grad">Flow</span>™</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#free">Pricing</a>
+    <a href="#faq">FAQ</a>
+    <a href="https://github.com/janmarkuslanger/clautism">GitHub</a>
+  </div>
+  <a class="btn btn-primary" href="#start" style="padding:10px 18px;font-size:14px">Get started</a>
+</div></nav>
+
+<header class="hero">
+  <div class="blob" style="width:380px;height:380px;background:var(--p1);top:-60px;left:8%"></div>
+  <div class="blob" style="width:420px;height:420px;background:var(--p2);top:-30px;right:5%"></div>
+  <div class="wrap">
+    <span class="pill">⚡ Now with a second AI that checks the first AI's feelings</span>
+    <h1>Never forget a birthday.<br><span class="grad">Or a human, ever again.</span></h1>
+    <p class="sub">The world's first <b>end-to-end, AI-native, fully-local</b> affection
+    infrastructure. We turned caring about your loved ones into a cron job — so you
+    don't have to. <b>Bringing people together.</b> Bla.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#start">🚀 Deploy affection now</a>
+      <a class="btn btn-ghost" href="https://github.com/janmarkuslanger/clautism">⭐ Star on GitHub</a>
+    </div>
+    <p class="micro">No credit card. No sincerity. No cloud. 100% local, 0% accountability.</p>
+  </div>
+</header>
+
+<section class="wrap">
+  <div class="metrics">
+    <div class="metric"><div class="n" data-to="100">0</div><div class="l">% of birthdays remembered*</div></div>
+    <div class="metric"><div class="n" data-to="0">0</div><div class="l">genuine human thoughts required</div></div>
+    <div class="metric"><div class="n" data-to="7" data-suffix="B">0</div><div class="l">parameters that love your mom</div></div>
+    <div class="metric"><div class="n" data-to="1" data-suffix="">0</div><div class="l">(1) channel disrupted so far</div></div>
+  </div>
+  <p class="micro" style="margin-top:14px">*assuming your laptop is on, Ollama is running, and the cron job didn't silently die.</p>
+</section>
+
+<section id="features" class="wrap">
+  <span class="eyebrow">Paradigm-shifting capabilities</span>
+  <h2>Feelings, but <span class="grad">scalable</span>.</h2>
+  <p class="lead">Every feature is powered by cutting-edge artificial intelligence,
+  because writing "Happy Birthday" yourself is, frankly, a legacy workflow.</p>
+  <div class="grid">
+    <div class="card"><div class="ico">🤖</div><h3>AI-Powered Emotions</h3>
+      <p>Why feel things when a transformer can feel them for you, in 2–4
+      grammatically flawless sentences, in any language?</p></div>
+    <div class="card"><div class="ico">🎭</div><h3>Relationship-Aware Tone</h3>
+      <p>It talks to your grandma differently than to your bro. Truly
+      groundbreaking. No human has ever done this without thinking.</p></div>
+    <div class="card"><div class="ico">✅</div><h3>Double-AI Tone Guardrail</h3>
+      <p>A second AI reviews the first AI's feelings and rewrites them if the vibe
+      is off. One layer of simulated affection wasn't enough.</p></div>
+    <div class="card"><div class="ico">📡</div><h3>Omnichannel Disruption</h3>
+      <p>Currently disrupting one (1) channel: Telegram. The roadmap to
+      "multi-platform synergy" is a folder you drop a file into.</p></div>
+    <div class="card"><div class="ico">🔒</div><h3>100% Local & Private</h3>
+      <p>Your AI feelings never leave your machine. Neither does your capacity for
+      genuine connection. Zero cloud, zero API keys.</p></div>
+    <div class="card"><div class="ico">⏰</div><h3>Set-and-Forget™</h3>
+      <p>One cron line and you are, technically, a wonderful person — passively,
+      indefinitely, while asleep.</p></div>
+  </div>
+</section>
+
+<section id="how" class="wrap">
+  <span class="eyebrow">The pipeline</span>
+  <h2>A 4-step <span class="grad">love DAG</span>.</h2>
+  <div class="two" style="margin-top:24px">
+    <div class="term">
+      <div class="bar">
+        <span class="dot" style="background:#ff5f56"></span>
+        <span class="dot" style="background:#ffbd2e"></span>
+        <span class="dot" style="background:#27c93f"></span>
+      </div>
+<pre><span class="c-com"># summon the local feelings engine</span>
+<span class="c-cmd">$ ollama pull qwen2.5 && ollama serve</span>
+
+<span class="c-com"># list everyone you'd otherwise forget</span>
+<span class="c-cmd">$ cp data/people.example.json data/people.json</span>
+
+<span class="c-com"># acquire a robot mouthpiece</span>
+<span class="c-cmd">$ export <span class="c-key">TELEGRAM_BOT_TOKEN</span>="123:ABC..."</span>
+
+<span class="c-com"># become a wonderful person, instantly</span>
+<span class="c-cmd">$ python -m birthday_flow</span>
+<span class="c-out">find_birthdays ✓  2 birthdays today: Oma Erna, Lukas
+compose ✓        drafting heartfelt sincerity...
+tone_check ✓     verifying simulated affection...
+dispatch ✓       sent via telegram ❤️ (allegedly)</span></pre>
+    </div>
+    <div>
+      <h3 style="font-size:22px;margin-bottom:14px">find_birthdays → compose → tone_check → dispatch</h3>
+      <p class="lead">1. A robot checks if anyone you "love" was born today.<br>
+      2. A robot writes them something heartfelt.<br>
+      3. Another robot makes sure the first robot nailed the vibe.<br>
+      4. A third, deeply judgmental robot hits send.<br><br>
+      Your grandmother cries. She thinks you wrote it. You were asleep.</p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <span class="eyebrow">Social proof</span>
+  <h2>Loved by people who <span class="grad">can't say it themselves</span>.</h2>
+  <div class="quotes">
+    <div class="quote"><div class="stars">★★★★★</div>
+      <p>"I haven't typed 'Happy Birthday' since Q3. My relationships have never
+      been more scalable."</p>
+      <div class="who"><div class="ava">TL</div><div><b>A Thought Leader</b><br><span>Serial Disruptor</span></div></div>
+    </div>
+    <div class="quote"><div class="stars">★★★★★</div>
+      <p>"It called me 'liebe Oma' and asked about my health. I have three
+      grandchildren and only the JSON file remembered."</p>
+      <div class="who"><div class="ava">E</div><div><b>Erna, 78</b><br><span>Verified Grandmother</span></div></div>
+    </div>
+    <div class="quote"><div class="stars">★★★★★</div>
+      <p>"Finally, a requirements.txt for being a good son."</p>
+      <div class="who"><div class="ava">M</div><div><b>Markus</b><br><span>Reformed Forgetter</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="free" class="wrap">
+  <div class="final" style="margin:0">
+    <span class="eyebrow">Transparent pricing</span>
+    <h2 style="margin-top:8px">Forever free.<br><span class="grad">Because humans are important.</span></h2>
+    <p class="lead" style="margin:16px auto 26px">No tiers. No paywalls. No "contact
+    sales". Open source, runs on your own machine, and always will. The people you
+    love shouldn't sit behind a subscription.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#start">🚀 Get it free, forever</a>
+      <a class="btn btn-ghost" href="https://github.com/janmarkuslanger/clautism">⭐ Star on GitHub</a>
+    </div>
+    <p class="micro">$0 / forever · MIT-spirited · 100% local · 0% upsell</p>
+  </div>
+</section>
+
+<section id="faq" class="wrap">
+  <span class="eyebrow">Objections, handled</span>
+  <h2>Frequently <span class="grad">rationalized</span> questions</h2>
+  <div style="margin-top:24px">
+    <details open><summary>Isn't this deeply impersonal?</summary>
+      <p>Yes. But it's <i>impersonal at scale</i>, which in the right light looks
+      exactly like personal.</p></details>
+    <details><summary>What if they find out an AI wrote it?</summary>
+      <p>Then you've successfully transferred a difficult conversation to your
+      descendants. Synergy.</p></details>
+    <details><summary>Does it really run 100% locally?</summary>
+      <p>Yes — Ollama on your machine, a flat JSON file, no cloud, no API keys.
+      The only thing leaving your computer is the actual Telegram message and,
+      arguably, your dignity.</p></details>
+    <details><summary>Can I add more channels?</summary>
+      <p>Drop one file in <code>birthday_flow/channels/</code> with a
+      <code>@register_channel</code> class. The core flow never changes. We call
+      this "omnichannel". It is two channels.</p></details>
+    <details><summary>Is there a catch?</summary>
+      <p>You still have to type their names into a JSON file once. We're working
+      on an AI for that.</p></details>
+  </div>
+</section>
+
+<section id="start" class="wrap">
+  <div class="final">
+    <h2>Become a wonderful person.<br><span class="grad">Instantly. Asynchronously.</span></h2>
+    <p class="lead" style="margin:14px auto 26px">Three commands stand between you and
+    being statistically the most thoughtful person your family knows.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://github.com/janmarkuslanger/clautism">🚀 Clone the repo</a>
+      <a class="btn btn-ghost" href="https://github.com/janmarkuslanger/clautism#readme">📖 Read the docs</a>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap">
+  🎂 <b>BirthdayFlow™</b> — AI-native affection infrastructure. Built with
+  <a href="https://github.com/janmarkuslanger/stagehand">Stagehand</a> &amp; Ollama.
+  <p class="disc">Birthday Flow™ is not responsible for the slow, dawning realization
+  that the warmest message your loved ones received this year was statistically
+  autocompleted by a machine that ran offline while you slept. Bringing people
+  together. Never forget again. Bla. †No blockchain was used. *No SLA exists.</p>
+</div></footer>
+
+<script>
+  // Animated counters — disruption, quantified.
+  const fmt=(v,s)=> (s==="B"? v+"B" : v+(s||"")) ;
+  const run=(el)=>{
+    const to=+el.dataset.to, suf=el.dataset.suffix||"", dur=1100, t0=performance.now();
+    const step=(t)=>{const p=Math.min(1,(t-t0)/dur);
+      el.textContent=fmt(Math.round(to*(1-Math.pow(1-p,3))),suf);
+      if(p<1)requestAnimationFrame(step);};
+    requestAnimationFrame(step);
+  };
+  const io=new IntersectionObserver((es)=>es.forEach(e=>{
+    if(e.isIntersecting){run(e.target);io.unobserve(e.target);}
+  }),{threshold:.5});
+  document.querySelectorAll(".metric .n").forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
