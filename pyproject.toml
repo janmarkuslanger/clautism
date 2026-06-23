@@ -1,0 +1,21 @@
+[project]
+name = "clautism-birthday-flow"
+version = "0.1.0"
+description = "Local birthday flow: detect birthdays and send relation-aware wishes via pluggable channels, powered by Ollama + Stagehand."
+requires-python = ">=3.11"
+dependencies = [
+    "stagehand-ai>=0.7.0",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+birthday-flow = "birthday_flow.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["birthday_flow*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

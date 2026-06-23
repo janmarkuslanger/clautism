@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Oma Erna",
+    "birthday": "1948-06-23",
+    "relation": "grandparent",
+    "channel": "telegram",
+    "recipient": "111111111",
+    "language": "de"
+  },
+  {
+    "name": "Lukas",
+    "birthday": "06-23",
+    "relation": "friend",
+    "channel": "telegram",
+    "recipient": "222222222",
+    "language": "de"
+  },
+  {
+    "name": "Mama",
+    "birthday": "1965-03-12",
+    "relation": "parent",
+    "channel": "telegram",
+    "recipient": "333333333",
+    "language": "de"
+  },
+  {
+    "name": "Sara",
+    "birthday": "1992-11-05",
+    "relation": "sibling",
+    "channel": "telegram",
+    "recipient": "444444444",
+    "language": "de"
+  }
+]
