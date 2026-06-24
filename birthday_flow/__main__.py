@@ -8,11 +8,17 @@ from __future__ import annotations
 
 import asyncio
 
+from dotenv import load_dotenv
 from stagehand import StdlibLogger
 
 from birthday_flow.channels.base import available_channels
 from birthday_flow.config import Config
 from birthday_flow.flow import build_workflow
+
+
+def main() -> None:
+    load_dotenv()
+    asyncio.run(_main())
 
 
 async def _main() -> None:
@@ -26,10 +32,6 @@ async def _main() -> None:
     builder = build_workflow(config).logger(StdlibLogger())
     run_id = await builder.run()
     print(f"done (run_id={run_id})")
-
-
-def main() -> None:
-    asyncio.run(_main())
 
 
 if __name__ == "__main__":

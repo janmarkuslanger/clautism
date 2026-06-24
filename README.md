@@ -33,28 +33,26 @@ find_birthdays ─▶ compose ─▶ tone_check ─▶ dispatch ─▶ ❤️ (a
 4. **dispatch** (plain Python) — a third, deeply judgmental robot hits send.
 5. Your grandmother cries. She thinks you wrote it. You were asleep.
 
-(No, the *other* Stagehand — the browser-automation one — would not help here.
-Telegram has a Bot API. No browser, no problem.)
-
 ## Quick Start (For Visionaries)
 
 ```bash
 # 1. Install the feelings dependencies
-pip install -r requirements.txt          # or: pip install -e .
+uv sync
 
 # 2. Summon the local feelings engine
 ollama pull qwen2.5
 ollama serve
 
-# 3. List everyone you'd otherwise forget
+# 3. Configure credentials
+cp .env.example .env
+#   ...then fill in .env (see "Channel Setup" below)
+
+# 4. List everyone you'd otherwise forget
 cp data/people.example.json data/people.json
 #   ...then edit data/people.json (see "The Data" below)
 
-# 4. Acquire a robot mouthpiece (token from @BotFather on Telegram)
-export TELEGRAM_BOT_TOKEN="123456:ABC..."
-
 # 5. Become a wonderful person, instantly
-python -m birthday_flow
+uv run python -m birthday_flow
 ```
 
 ### Too scared to unleash it on real humans?
@@ -62,13 +60,13 @@ python -m birthday_flow
 Disrupt yourself first — feelings, but only to your terminal:
 
 ```bash
-BIRTHDAY_DRY_RUN=1 python -m birthday_flow      # routes everything to the console channel
+BIRTHDAY_DRY_RUN=1 uv run python -m birthday_flow      # routes everything to the console channel
 ```
 
 ### Test a specific day (because waiting for a birthday is so analog)
 
 ```bash
-BIRTHDAY_DATE=2026-06-23 BIRTHDAY_DRY_RUN=1 python -m birthday_flow
+BIRTHDAY_DATE=2026-06-23 BIRTHDAY_DRY_RUN=1 uv run python -m birthday_flow
 ```
 
 ## The Data (a.k.a. the people you keep forgetting)
@@ -84,7 +82,7 @@ your loved ones won't end up on GitHub.
     "birthday": "1948-06-23",
     "relation": "grandparent",
     "channel": "telegram",
-    "recipient": "111111111",
+    "recipient": "@username",
     "language": "de"
   }
 ]
@@ -95,12 +93,53 @@ your loved ones won't end up on GitHub.
   (`grandparent`, `parent`, `sibling`, `partner`, `friend`, `colleague`),
   otherwise `default`.
 - `channel` — which delivery channel to use (today: `telegram` or `console`).
-- `recipient` — channel-specific address. For Telegram, the chat id.
+- `recipient` — channel-specific address. Format depends on the channel — see
+  "Channel Setup" below.
 
 Loading and the birthday math live in `birthday_flow/people.py`. Data is read into
 memory at runtime and never written back. Stagehand does persist per-run state
 (including generated messages) under `.stagehand/runs/` — also `.gitignore`d, and
 relocatable via `BIRTHDAY_STATE_DIR`.
+
+## Channel Setup
+
+Each person in `people.json` has a `"channel"` field. Set it to the name of the
+channel you want to use. `console` always works out of the box (dry-run/testing).
+Everything else requires credentials.
+
+### `telegram`
+
+Messages are sent from **your own Telegram account** via
+[Telethon](https://github.com/LonamiWebs/Telethon) — not a bot. Recipients do not
+need to have done anything first.
+
+**1. Get credentials** — go to https://my.telegram.org → *API development tools*
+→ create an app → copy `api_id` and `api_hash`.
+
+**2. Set env vars:**
+
+```bash
+export TELEGRAM_API_ID="12345"
+export TELEGRAM_API_HASH="abc123..."
+export TELEGRAM_PHONE="+4917612345678"   # international format
+```
+
+**3. Authenticate (once)** — on the first real run, Telegram sends you an SMS/app
+code. Enter it in the prompt. Telethon saves the session to `telegram_session`
+(or the path in `TELEGRAM_SESSION`) and every subsequent run is fully silent.
+
+**`recipient` format:** `@username`, phone number, or numeric user ID — all accepted.
+
+### `console`
+
+No setup. Prints to stdout. Used automatically when `BIRTHDAY_DRY_RUN=1`.
+
+### Adding your own channel
+
+Drop a file in `birthday_flow/channels/`, implement `Channel`, decorate with
+`@register_channel` — done. See "Omnichannel Disruption" below.
+
+---
 
 ## Configuration (Env Variables)
 
@@ -112,7 +151,10 @@ relocatable via `BIRTHDAY_STATE_DIR`.
 | `BIRTHDAY_DATE` | today | Override the date (for testing) |
 | `BIRTHDAY_DRY_RUN` | off | Route everything to the `console` channel |
 | `BIRTHDAY_STATE_DIR` | `.stagehand/runs` | Where Stagehand stores run state |
-| `TELEGRAM_BOT_TOKEN` | – | Required for actually sending via Telegram |
+| `TELEGRAM_API_ID` | – | From https://my.telegram.org |
+| `TELEGRAM_API_HASH` | – | From https://my.telegram.org |
+| `TELEGRAM_PHONE` | – | Your phone number in international format |
+| `TELEGRAM_SESSION` | `telegram_session` | Path to the Telethon session file |
 
 ## Omnichannel Disruption 📡 (currently disrupting one (1) channel)
 
@@ -144,20 +186,20 @@ birthday_flow/
   flow.py          # the Stagehand workflow (the core DAG)
   channels/
     base.py        # Channel interface + registry
-    telegram.py    # first channel: Telegram
+    telegram.py    # Telegram via Telethon (your account, not a bot)
     console.py     # channel for local testing / dry-run
 ```
 
 ## Run It Daily (cron, for set-and-forget affection)
 
 ```cron
-0 8 * * *  cd /path/to/clautism && /usr/bin/python -m birthday_flow >> birthday.log 2>&1
+0 8 * * *  cd /path/to/clautism && uv run python -m birthday_flow >> birthday.log 2>&1
 ```
 
 ## Tests
 
 ```bash
-pytest
+uv run pytest
 ```
 
 ---

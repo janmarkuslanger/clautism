@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "clautism-birthday-flow"
 version = "0.1.0"
@@ -5,10 +9,11 @@ description = "Local birthday flow: detect birthdays and send relation-aware wis
 requires-python = ">=3.11"
 dependencies = [
     "stagehand-ai>=0.7.0",
-    "httpx>=0.27",
+    "telethon>=1.36",
+    "python-dotenv>=1.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = ["pytest>=8.0"]
 
 [project.scripts]
